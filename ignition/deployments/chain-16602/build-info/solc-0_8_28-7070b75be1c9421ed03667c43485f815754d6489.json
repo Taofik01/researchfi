@@ -1,0 +1,49 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-7070b75be1c9421ed03667c43485f815754d6489",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.9.0"
+  },
+  "userSourceNameMap": {
+    "contracts/ResearchFi.sol": "project/contracts/ResearchFi.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/ResearchFi.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\ncontract ResearchFi {\n    struct Proposal {\n        string cid;\n        address researcher;\n        string title;\n        uint256 timestamp;\n    }\n\n    Proposal[] public proposals;\n\n    event ProposalSubmitted(\n        uint256 indexed id,\n        string cid,\n        address indexed researcher,\n        string title,\n        uint256 timestamp\n    );\n\n    function submitProposal(string calldata cid, string calldata title) external {\n        uint256 id = proposals.length;\n        proposals.push(Proposal(cid, msg.sender, title, block.timestamp));\n        emit ProposalSubmitted(id, cid, msg.sender, title, block.timestamp);\n    }\n\n    function getProposal(uint256 id) external view returns (Proposal memory) {\n        require(id < proposals.length, \"Proposal does not exist\");\n        return proposals[id];\n    }\n\n    function totalProposals() external view returns (uint256) {\n        return proposals.length;\n    }\n}"
+      }
+    }
+  }
+}
