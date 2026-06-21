@@ -151,7 +151,7 @@ await new Promise(res => setTimeout(res, 2000))
   }
 }
 
-  const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
+//   const delay = (ms: number) => new Promise(res => setTimeout(res, ms))
 
   const canProceedDetails = form.title && form.abstract && form.researcher
 
