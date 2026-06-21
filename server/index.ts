@@ -10,7 +10,12 @@ import os from 'os'
 dotenv.config()
 
 const app = express()
-app.use(cors({ origin: 'http://localhost:5173' }))
+app.use(cors({ 
+  origin: [
+    'http://localhost:5173',
+    'https://researchfi-ashen.vercel.app',
+  ] 
+}))
 app.use(express.json())
 
 const upload = multer({ dest: os.tmpdir() })
