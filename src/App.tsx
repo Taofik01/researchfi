@@ -21,6 +21,11 @@ function App() {
       txHash: '0xabc123def456',
       timestamp: Date.now() - 86400000,
       status: 'reviewed',
+      milestones: [
+        { description: 'Literature review and dataset curation complete', released: true, amount: '500' },
+        { description: 'Federated model training across 12 institutions', released: false, amount: '1000' },
+        { description: 'Paper published and peer validated', released: false, amount: '500' },
+      ],
       aiReview: {
         summary: [
           'Proposes federated learning for biomarker discovery without centralising patient data',
@@ -45,6 +50,11 @@ function App() {
       txHash: '0xdef789ghi012',
       timestamp: Date.now() - 172800000,
       status: 'funded',
+      milestones: [
+        { description: 'TCR mechanism whitepaper published', released: true, amount: '800' },
+        { description: 'Smart contract audit complete', released: true, amount: '600' },
+        { description: 'Governance testnet live', released: false, amount: '600' },
+      ],
       aiReview: {
         summary: [
           'Novel TCR mechanism where governance weight derives from peer-validated research output',
@@ -81,7 +91,6 @@ function App() {
       {page === 'submit' && (
         <Submit onSubmit={handleSubmitProposal} />
       )}
-      
       {page === 'proposal' && selectedProposal && (
         <ProposalDetail proposal={selectedProposal} setPage={setPage} />
       )}

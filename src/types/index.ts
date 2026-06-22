@@ -1,3 +1,8 @@
+export interface Milestone {
+  description: string
+  released: boolean
+  amount: string
+}
 export interface Proposal {
   id: string;
   title: string;
@@ -9,6 +14,7 @@ export interface Proposal {
   timestamp: number;
   aiReview?: AIReview;
   status: 'pending' | 'reviewing' | 'reviewed' | 'funded';
+  milestones?: Milestone[];
 }
 
 export interface AIReview {

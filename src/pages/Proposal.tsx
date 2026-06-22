@@ -3,6 +3,7 @@ import type { Page } from '../App'
 import { useAccount } from 'wagmi'
 import { publicClient, CONTRACT_ADDRESS, CONTRACT_ABI } from '../lib/contract'
 import { useEffect, useState } from 'react'
+import MilestoneTracker from '../components/MilestoneTracker'
 
 interface Props {
   proposal: Proposal
@@ -26,6 +27,7 @@ export default function ProposalDetail({ proposal, setPage }: Props) {
   const rec = proposal.aiReview ? recommendationConfig[proposal.aiReview.recommendation] : null
   const timeAgo = Math.floor((Date.now() - proposal.timestamp) / 86400000)
   const { address } = useAccount()
+const isResearcher = address?.toLowerCase() === proposal.walletAddress?.toLowerCase()
 const [reputation, setReputation] = useState<{ proposalCount: bigint; stakedReceived: bigint; reputation: bigint } | null>(null)
 
 useEffect(() => {
@@ -181,6 +183,14 @@ useEffect(() => {
             </div>
           </div>
         </div>
+
+        {proposal.milestones && proposal.milestones.length > 0 && (
+  <MilestoneTracker
+    proposalId={proposal.id}
+    milestones={proposal.milestones}
+    isResearcher={isResearcher}
+  />
+)}
 
         {/* Sidebar */}
         <div className="space-y-4">

@@ -11,6 +11,9 @@ export const CONTRACT_ABI = parseAbi([
   'function getResearcherProposals(address researcher) external view returns (uint256[])',
   'event ProposalSubmitted(uint256 indexed id, string cid, address indexed researcher, string title, uint256 timestamp)',
   'event Staked(uint256 indexed proposalId, address indexed funder, uint256 amount)',
+  'function addMilestone(uint256 proposalId, string calldata description, uint256 amount) external',
+'function releaseMilestone(uint256 proposalId, uint256 milestoneIndex) external',
+'function getMilestones(uint256 proposalId) external view returns (tuple(string description, bool released, uint256 amount)[])',
 ])
 
 export const publicClient = createPublicClient({
