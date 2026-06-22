@@ -1,0 +1,49 @@
+{
+  "_format": "hh3-sol-build-info-1",
+  "id": "solc-0_8_28-1a0fbce669e2f74111d61c37e4a7e156995b8655",
+  "solcVersion": "0.8.28",
+  "solcLongVersion": "0.8.28+commit.7893614a",
+  "compilerType": "solc",
+  "toolVersions": {
+    "hardhat": "3.9.0"
+  },
+  "userSourceNameMap": {
+    "contracts/ResearchFi.sol": "project/contracts/ResearchFi.sol"
+  },
+  "input": {
+    "language": "Solidity",
+    "settings": {
+      "evmVersion": "cancun",
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode.linkReferences",
+            "evm.bytecode.object",
+            "evm.bytecode.opcodes",
+            "evm.bytecode.sourceMap",
+            "evm.deployedBytecode.immutableReferences",
+            "evm.deployedBytecode.linkReferences",
+            "evm.deployedBytecode.object",
+            "evm.deployedBytecode.opcodes",
+            "evm.deployedBytecode.sourceMap",
+            "evm.methodIdentifiers"
+          ]
+        }
+      },
+      "remappings": []
+    },
+    "sources": {
+      "project/contracts/ResearchFi.sol": {
+        "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.28;\n\ncontract ResearchFi {\n    struct Proposal {\n        string cid;\n        address researcher;\n        string title;\n        uint256 timestamp;\n        bool funded;\n        uint256 aiScore;\n    }\n\n    struct Milestone {\n        string description;\n        bool released;\n        uint256 amount;\n    }\n\n    Proposal[] public proposals;\n    mapping(uint256 => Milestone[]) public milestones;\n    mapping(address => uint256[]) public researcherProposals;\n    mapping(address => uint256) public totalStaked;\n\n    event ProposalSubmitted(\n        uint256 indexed id,\n        string cid,\n        address indexed researcher,\n        string title,\n        uint256 timestamp\n    );\n\n    event MilestoneReleased(uint256 indexed proposalId, uint256 milestoneIndex);\n    event Staked(uint256 indexed proposalId, address indexed funder, uint256 amount);\n\n    function submitProposal(\n        string calldata cid,\n        string calldata title,\n        uint256 aiScore\n    ) external {\n        uint256 id = proposals.length;\n        proposals.push(Proposal(cid, msg.sender, title, block.timestamp, false, aiScore));\n        researcherProposals[msg.sender].push(id);\n        emit ProposalSubmitted(id, cid, msg.sender, title, block.timestamp);\n    }\n\n    function stakeOnProposal(uint256 proposalId) external payable {\n        require(proposalId < proposals.length, \"Invalid proposal\");\n        require(msg.value > 0, \"Must stake > 0\");\n        totalStaked[proposals[proposalId].researcher] += msg.value;\n        emit Staked(proposalId, msg.sender, msg.value);\n    }\n\n    function getReputation(address researcher) external view returns (\n        uint256 proposalCount,\n        uint256 stakedReceived,\n        uint256 reputation\n    ) {\n        proposalCount = researcherProposals[researcher].length;\n        stakedReceived = totalStaked[researcher];\n        reputation = (proposalCount * 10) + (stakedReceived / 1e16);\n        if (reputation > 100) reputation = 100;\n    }\n\n    function getProposal(uint256 id) external view returns (Proposal memory) {\n        require(id < proposals.length, \"Proposal does not exist\");\n        return proposals[id];\n    }\n\n    function totalProposals() external view returns (uint256) {\n        return proposals.length;\n    }\n\n    function getResearcherProposals(address researcher) external view returns (uint256[] memory) {\n        return researcherProposals[researcher];\n    }\n}"
+      }
+    }
+  }
+}

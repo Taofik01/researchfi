@@ -1,6 +1,7 @@
 import type { Proposal } from '../types'
 import type { Page } from '../App'
 import ProposalCard from '../components/ProposalCard'
+import { useState } from 'react'
 
 interface Props {
   proposals: Proposal[]
@@ -79,7 +80,34 @@ const features = [
   },
 ]
 
+const activityFeed = [
+  { action: 'staked', amount: '500 OG', proposal: 'Decentralised Biomarker Discovery', wallet: '0x3f9a...2b1c', time: '2 mins ago' },
+  { action: 'submitted', amount: null, proposal: 'On-Chain Governance for Drug Development', wallet: '0x891e...5678', time: '14 mins ago' },
+  { action: 'reviewed', amount: null, proposal: 'Decentralised Biomarker Discovery', wallet: 'AI Agent', time: '22 mins ago' },
+  { action: 'staked', amount: '100 OG', proposal: 'On-Chain Governance for Drug Development', wallet: '0x4a2d...9f3e', time: '35 mins ago' },
+  { action: 'submitted', amount: null, proposal: 'Federated Learning Research', wallet: '0x7104...571B', time: '1 hr ago' },
+  { action: 'staked', amount: '1000 OG', proposal: 'Decentralised Biomarker Discovery', wallet: '0x6c8b...1a2d', time: '2 hrs ago' },
+]
+
+const actionColors: Record<string, string> = {
+  staked: 'text-emerald-400',
+  submitted: 'text-blue-400',
+  reviewed: 'text-yellow-400',
+}
+
 export default function Home({ proposals, onSelectProposal, setPage }: Props) {
+  const [activeFilter, setActiveFilter] = useState('All')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredProposals = proposals.filter(p => {
+    const matchesFilter = activeFilter === 'All' || p.status === activeFilter.toLowerCase()
+    const matchesSearch = searchQuery === '' ||
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.abstract.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.researcher.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesFilter && matchesSearch
+  })
+
   return (
     <main className="max-w-7xl mx-auto px-6">
 
@@ -120,7 +148,6 @@ export default function Home({ proposals, onSelectProposal, setPage }: Props) {
             </button>
           </div>
 
-          {/* Tech stack pills */}
           <div className="flex items-center justify-center gap-3 flex-wrap">
             {['0G Storage', '0G DA Layer', '0G Inference', '0G Chain'].map(tech => (
               <span key={tech} className="text-xs px-3 py-1.5 rounded-full bg-gray-900 border border-gray-800 text-gray-400">
@@ -175,32 +202,104 @@ export default function Home({ proposals, onSelectProposal, setPage }: Props) {
         </div>
       </section>
 
-      {/* Active Proposals */}
+      {/* Active Proposals + Activity Feed side by side */}
       <section className="mb-24">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-white">Active Proposals</h2>
-            <p className="text-gray-500 text-sm mt-1">Community-submitted research open for funding</p>
-          </div>
-          <div className="flex gap-2">
-            {['All', 'Pending', 'Reviewed', 'Funded'].map(f => (
-              <button key={f} className="text-sm px-3 py-1.5 rounded-lg border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors">
-                {f}
-              </button>
-            ))}
-          </div>
-        </div>
+        <div className="grid grid-cols-3 gap-6">
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {proposals.map(p => (
-            <ProposalCard key={p.id} proposal={p} onClick={() => onSelectProposal(p)} />
-          ))}
-        </div>
+          {/* Proposals — 2/3 width */}
+          <div className="col-span-2">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Active Proposals</h2>
+                <p className="text-gray-500 text-sm mt-1">Community-submitted research open for funding</p>
+              </div>
+            </div>
 
-        <div className="text-center">
-          <button className="text-sm text-gray-500 hover:text-emerald-400 transition-colors border border-gray-800 hover:border-emerald-900 px-6 py-2.5 rounded-lg">
-            View all proposals →
-          </button>
+            {/* Search + Filter */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex-1 relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M11 11l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search proposals, researchers..."
+                  className="w-full bg-gray-900 border border-gray-700 rounded-lg pl-9 pr-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-emerald-600 transition-colors"
+                />
+              </div>
+              <div className="flex gap-2">
+                {['All', 'Pending', 'Reviewed', 'Funded'].map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setActiveFilter(f)}
+                    className={`text-sm px-3 py-2 rounded-lg border transition-colors ${
+                      activeFilter === f
+                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        : 'border-gray-700 text-gray-400 hover:text-white hover:border-gray-500'
+                    }`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {filteredProposals.length === 0 ? (
+              <div className="text-center py-16 bg-gray-900 border border-gray-800 rounded-xl">
+                <p className="text-gray-500 text-sm">No proposals match your search.</p>
+                <button
+                  onClick={() => { setSearchQuery(''); setActiveFilter('All') }}
+                  className="text-emerald-500 hover:text-emerald-400 text-sm mt-2 transition-colors"
+                >
+                  Clear filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {filteredProposals.map(p => (
+                  <ProposalCard key={p.id} proposal={p} onClick={() => onSelectProposal(p)} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Activity Feed — 1/3 width */}
+          <div className="col-span-1">
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-white">Live Activity</h2>
+              <p className="text-gray-500 text-sm mt-1">Real-time on-chain events</p>
+            </div>
+
+            <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+              <div className="divide-y divide-gray-800">
+                {activityFeed.map((item, i) => (
+                  <div key={i} className="p-4 hover:bg-gray-800/50 transition-colors">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <span className="text-gray-600 text-xs font-mono">{item.wallet}</span>
+                      <span className="text-gray-600 text-xs flex-shrink-0">{item.time}</span>
+                    </div>
+                    <p className="text-gray-400 text-xs leading-relaxed">
+                      <span className={`font-medium ${actionColors[item.action]}`}>
+                        {item.action === 'staked' ? `Staked ${item.amount}` : item.action === 'submitted' ? 'Submitted' : 'AI Reviewed'}
+                      </span>
+                      {' '}on{' '}
+                      <span className="text-gray-300 font-medium">{item.proposal}</span>
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-4 border-t border-gray-800">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                  <span className="text-gray-600 text-xs">Live — updates every block</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

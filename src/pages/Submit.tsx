@@ -120,7 +120,7 @@ const hash = await walletClient.writeContract({
   address: CONTRACT_ADDRESS,
   abi: CONTRACT_ABI,
   functionName: 'submitProposal',
-  args: [storageCid, form.title],
+  args: [storageCid, form.title, BigInt(aiReview?.score || 0)],
   account: address,
 })
 

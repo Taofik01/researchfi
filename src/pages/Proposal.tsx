@@ -1,5 +1,8 @@
 import type { Proposal } from '../types'
 import type { Page } from '../App'
+import { useAccount } from 'wagmi'
+import { publicClient, CONTRACT_ADDRESS, CONTRACT_ABI } from '../lib/contract'
+import { useEffect, useState } from 'react'
 
 interface Props {
   proposal: Proposal
@@ -22,6 +25,24 @@ const statusColors = {
 export default function ProposalDetail({ proposal, setPage }: Props) {
   const rec = proposal.aiReview ? recommendationConfig[proposal.aiReview.recommendation] : null
   const timeAgo = Math.floor((Date.now() - proposal.timestamp) / 86400000)
+  const { address } = useAccount()
+const [reputation, setReputation] = useState<{ proposalCount: bigint; stakedReceived: bigint; reputation: bigint } | null>(null)
+
+useEffect(() => {
+  if (!proposal.walletAddress) return
+  publicClient.readContract({
+    address: CONTRACT_ADDRESS,
+    abi: CONTRACT_ABI,
+    functionName: 'getReputation',
+    args: [proposal.walletAddress as `0x${string}`],
+  }).then((result: any) => {
+    setReputation({
+      proposalCount: result[0],
+      stakedReceived: result[1],
+      reputation: result[2],
+    })
+  }).catch(console.error)
+}, [proposal.walletAddress])
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
@@ -206,7 +227,7 @@ export default function ProposalDetail({ proposal, setPage }: Props) {
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
             <h3 className="text-white font-semibold text-sm">Proposal Stats</h3>
             {[
-              { label: 'Reputation Score', value: '—' },
+              { label: 'Reputation Score', value: reputation ? `${reputation.reputation.toString()}/100` : '—' },
               { label: 'Funders', value: '12' },
               { label: 'Total Staked', value: '2,400 OG' },
               { label: 'Milestones', value: '3 defined' },
